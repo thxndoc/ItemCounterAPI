@@ -1,33 +1,23 @@
+using ItemCounterAPI.Models;
+using ItemCounterAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ItemCounterAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    [Route("api/[controller]")]
+    public class ItemCounterController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ItemCounterService _counterService = new ItemCounterService();
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        [HttpPost]
+        public IActionResult CountItems([FromBody] ItemCountRequest request)
         {
-            _logger = logger;
-        }
+            if (request.Items == null || request.Items.Count == 0)
+                return BadRequest("List cannot be empty.");
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var result = _counterService.CountItems(request.Items);
+            return Ok(result);
         }
     }
 }
